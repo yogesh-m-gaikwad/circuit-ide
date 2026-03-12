@@ -80,7 +80,7 @@ const documentsSlice = createSlice({
     ) => {
       const document = state.documents[action.payload.id];
       if (document) {
-        document.isDirty = false;
+        document.isDirty = true;
         document.name = action.payload.newName;
         document.updatedAt = new Date().toISOString();
       }
@@ -115,7 +115,6 @@ const documentsSlice = createSlice({
       const document = state.documents[action.payload.id];
       if (document) {
         Object.assign(document.viewport, action.payload.viewport);
-        document.updatedAt = new Date().toISOString();
       }
     },
 
@@ -225,8 +224,6 @@ const documentsSlice = createSlice({
       if (!document) return;
       snapshot(document);
       document.circuit.selectedIds = action.payload.selectedIds;
-      document.isDirty = true;
-      document.updatedAt = new Date().toISOString();
     },
 
     clearSelected: (state, action: PayloadAction<{ documentId: string }>) => {
@@ -234,8 +231,6 @@ const documentsSlice = createSlice({
       if (!document) return;
       snapshot(document);
       document.circuit.selectedIds = [];
-      document.isDirty = true;
-      document.updatedAt = new Date().toISOString();
     },
 
     undo: (state, action: PayloadAction<{ documentId: string }>) => {
