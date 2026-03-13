@@ -19,7 +19,7 @@ export interface CommandDefiinition {
   description: string;
   args: CommandArg[];
   aliases: string[];
-  execute: (args: ParsedArges, context: CommandContext) => CommandResult;
+  execute: (args: ParsedArgs, context: CommandContext) => CommandResult;
 }
 
 export interface CommandResult {
@@ -29,12 +29,13 @@ export interface CommandResult {
 }
 
 export interface CommandHistoryEntry {
+  id: string;
   input: string;
   result: CommandResult;
   timestamp: string;
 }
 
-export interface ParsedArges {
+export interface ParsedArgs {
   [key: string]: string | number | boolean | { x: number; y: number } | string;
 }
 

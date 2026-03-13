@@ -1,0 +1,71 @@
+export const AppLogo = () => {
+  return (
+    <div className="flex items-center gap-1.5 px-3 h-full border-r border-zinc-800 shrink-0">
+      <svg width="14" height="14" viewBox="0 0 20 20">
+        <line
+          x1="2"
+          y1="10"
+          x2="7"
+          y2="10"
+          stroke="#378ADD"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <circle
+          cx="10"
+          cy="10"
+          r="3"
+          fill="#185FA5"
+          stroke="#85B7EB"
+          strokeWidth="1"
+        />
+        <line
+          x1="13"
+          y1="10"
+          x2="16"
+          y2="10"
+          stroke="#378ADD"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <line
+          x1="16"
+          y1="10"
+          x2="16"
+          y2="6"
+          stroke="#378ADD"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <line
+          x1="16"
+          y1="10"
+          x2="16"
+          y2="14"
+          stroke="#378ADD"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <circle
+          cx="16"
+          cy="6"
+          r="2"
+          fill="#185FA5"
+          stroke="#85B7EB"
+          strokeWidth="1"
+        />
+        <circle
+          cx="16"
+          cy="14"
+          r="2"
+          fill="#185FA5"
+          stroke="#85B7EB"
+          strokeWidth="1"
+        />
+      </svg>
+      <span className="text-xs font-medium text-white tracking-wide">
+        Circuit<span className="text-chart-2">Forge</span>
+      </span>
+    </div>
+  );
+};

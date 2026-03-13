@@ -1,20 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import type { ComponentType } from "../types/circuit";
 
 export type ToolType = "select" | "wire" | "place" | "delete";
 
-export type ComponentTypeToPlace =
-  | "resistor"
-  | "capacitor"
-  | "inductor"
-  | "voltage_source"
-  | "ground"
-  | "ic"
-  | null;
-
 interface EditorState {
   activeTool: ToolType;
-  componentTypeToPlace: ComponentTypeToPlace;
+  componentTypeToPlace: ComponentType | null; // e.g. "RESISTOR", "CAPACITOR", etc. Only relevant when activeTool is "place"
   isPropertiesPanelOpen: boolean;
 }
 
@@ -33,7 +25,7 @@ const editorSlice = createSlice({
     },
     setComponentTypeToPlace: (
       state,
-      action: PayloadAction<ComponentTypeToPlace>,
+      action: PayloadAction<ComponentType | null>,
     ) => {
       state.componentTypeToPlace = action.payload;
     },
