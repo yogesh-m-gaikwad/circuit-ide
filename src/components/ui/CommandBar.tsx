@@ -95,7 +95,6 @@ export const CommandBar = () => {
     }
   };
 
-  console.log("CommandBar render, isOpen:", isOpen);
   if (!isOpen) return null;
 
   const recentHistory = history.slice().reverse().slice(0, 5);

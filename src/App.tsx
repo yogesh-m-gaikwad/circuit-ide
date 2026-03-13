@@ -11,7 +11,6 @@ function App() {
   // open on '/' or ':' keypress from anywhere in the app
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      console.log("key pressed:", e.key, "target:", e.target);
       if (e.key === "/" || e.key === ":") {
         e.preventDefault();
         dispatch(openCommandBar());

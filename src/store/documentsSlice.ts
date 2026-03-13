@@ -40,10 +40,12 @@ const snapshot = (document: PCBDocument) => {
   }
 };
 
+const defaultDocument = newDocument("default-doc", "Untitled-doc");
+
 const initialDocumentsState: DocumentsState = {
-  documents: {},
-  activeDocumentId: null,
-  tabOrder: [],
+  documents: { [defaultDocument.id]: defaultDocument },
+  activeDocumentId: defaultDocument.id,
+  tabOrder: [defaultDocument.id],
 };
 
 const documentsSlice = createSlice({
@@ -60,11 +62,15 @@ const documentsSlice = createSlice({
       state.activeDocumentId = id;
     },
 
-    closeDocument: (state, action: PayloadAction<string>) => {
-      const id = action.payload;
-      delete state.documents[id];
-      state.tabOrder = state.tabOrder.filter((tabId) => tabId !== id);
-      if (state.activeDocumentId === id) {
+    closeDocument: (state, action: PayloadAction<{ documentId: string }>) => {
+      const { documentId } = action.payload;
+
+      // never close the last tab
+      if (state.tabOrder.length <= 1) return;
+
+      delete state.documents[documentId];
+      state.tabOrder = state.tabOrder.filter((tabId) => tabId !== documentId);
+      if (state.activeDocumentId === documentId) {
         state.activeDocumentId =
           state.tabOrder[state.tabOrder.length - 1] ?? null;
       }
@@ -113,9 +119,11 @@ const documentsSlice = createSlice({
       action: PayloadAction<{ id: string; viewport: Partial<Viewport> }>,
     ) => {
       const document = state.documents[action.payload.id];
-      if (document) {
-        Object.assign(document.viewport, action.payload.viewport);
-      }
+      if (!document) return;
+      document.viewport = {
+        ...document.viewport,
+        ...action.payload.viewport,
+      };
     },
 
     addComponent: (

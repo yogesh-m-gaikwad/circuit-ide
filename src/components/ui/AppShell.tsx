@@ -11,7 +11,7 @@ export default function AppShell() {
       <TabBar />
       <div className="flex flex-1 overflow-hidden">
         <Toolbar />
-        <Group orientation="horizontal" className="flex-1">
+        <Group orientation="horizontal" className="flex-1 h-full">
           <Panel defaultSize="75%" minSize="40%" className="relative">
             <CanvasView />
           </Panel>

@@ -25,7 +25,7 @@ export default function TabBar() {
 
   const handleClose = (e: React.MouseEvent, id: string) => {
     e.stopPropagation(); // prevent tab activation on close
-    dispatch(closeDocument(id));
+    dispatch(closeDocument({ documentId: id }));
   };
 
   const handleActivate = (id: string) => {
@@ -39,7 +39,7 @@ export default function TabBar() {
         const doc = documents[id];
         if (!doc) return null;
         const isActive = id === activeDocumentId;
-
+        const isLastTab = tabOrder.length === 1;
         return (
           <div
             key={id}
@@ -60,18 +60,20 @@ export default function TabBar() {
             {/* document name */}
             <span className="truncate">{doc.name}</span>
 
-            {/* close button */}
-            <button
-              onClick={(e) => handleClose(e, id)}
-              className={cn(
-                "ml-auto rounded p-0.5 shrink-0",
-                "text-zinc-600 hover:text-white hover:bg-zinc-700",
-                "opacity-0 group-hover:opacity-100 transition-opacity",
-                isActive && "opacity-100",
-              )}
-            >
-              <X size={12} />
-            </button>
+            {/* close button, hidden if it's the only tab left */}
+            {!isLastTab && (
+              <button
+                onClick={(e) => handleClose(e, id)}
+                className={cn(
+                  "ml-auto rounded p-0.5 shrink-0",
+                  "text-zinc-600 hover:text-white hover:bg-zinc-700",
+                  "opacity-0 group-hover:opacity-100 transition-opacity",
+                  isActive && "opacity-100",
+                )}
+              >
+                <X size={12} />
+              </button>
+            )}
           </div>
         );
       })}

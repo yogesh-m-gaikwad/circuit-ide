@@ -1,11 +1,16 @@
+import { useRef } from "react";
 import { useActiveDocument } from "../../hooks/useActiveDocument";
 import { CommandBar } from "../ui/CommandBar";
+import { useThreeScene } from "../../three/useThreeScene";
 
 export const CanvasView = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const doc = useActiveDocument();
 
+  useThreeScene(containerRef);
+
   return (
-    <div className="flex-1 bg-zinc-950 relative">
+    <div ref={containerRef} className="relative h-full w-full">
       {!doc && (
         <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
           <div className="text-center">
