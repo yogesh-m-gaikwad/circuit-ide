@@ -14,14 +14,6 @@ export interface CommandArg {
   description: string;
 }
 
-export interface CommandDefiinition {
-  name: string;
-  description: string;
-  args: CommandArg[];
-  aliases: string[];
-  execute: (args: ParsedArgs, context: CommandContext) => CommandResult;
-}
-
 export interface CommandResult {
   success: boolean;
   message: string;
@@ -42,4 +34,15 @@ export interface ParsedArgs {
 export interface CommandContext {
   dispatch: AppDispatch;
   getState: () => RootState;
+}
+
+export interface CommandDefinition {
+  name: string;
+  aliases: string[];
+  description: string;
+  args: CommandArg[];
+  execute: (args: ParsedArgs, context: CommandContext) => CommandResult;
+  symbol?: string; // short glyph for toolbar — 'R', 'C', '⏚' etc
+  label?: string; // human readable name
+  category?: "place" | "action" | "view"; // for grouping
 }

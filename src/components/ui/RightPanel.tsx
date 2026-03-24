@@ -15,12 +15,6 @@ export default function RightPanel() {
             Properties
           </TabsTrigger>
           <TabsTrigger
-            value="components"
-            className="flex-1 text-xs text-gray-400 hover:text-indigo-200"
-          >
-            Components
-          </TabsTrigger>
-          <TabsTrigger
             value="analysis"
             className="flex-1 text-xs text-gray-400 hover:text-indigo-200"
           >

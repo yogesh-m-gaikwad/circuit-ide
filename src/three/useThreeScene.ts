@@ -26,7 +26,8 @@ export function useThreeScene(
     sceneRef.current = scene;
 
     // ── Camera ───────────────────────────────────────────────────────────
-    const { clientWidth: w, clientHeight: h } = container;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
     sizeRef.current = { w, h };
     const camera = new THREE.OrthographicCamera(
       -w / 2,
@@ -85,33 +86,13 @@ export function useThreeScene(
     };
     animate();
 
-    // ── Resize observer ──────────────────────────────────────────────────
-    const ro = new ResizeObserver(() => {
-      const nw = container.clientWidth;
-      const nh = container.clientHeight;
-
-      if (nw === 0 || nh === 0) return; // ignore zero-size frames
-      sizeRef.current = { w, h };
-
-      // update renderer
+    const onResize = () => {
+      const nw = window.innerWidth;
+      const nh = window.innerHeight;
+      sizeRef.current = { w: nw, h: nh };
       renderer.setSize(nw, nh);
-      renderer.setPixelRatio(window.devicePixelRatio);
-
-      // update camera frustum to match new dimensions
-      const state = store.getState();
-      const activeId = state.docs.activeDocumentId;
-      const viewport = activeId
-        ? state.docs.documents[activeId]?.viewport
-        : null;
-      const zoom = viewport?.zoom ?? 1;
-
-      camera.left = -nw / 2 / zoom;
-      camera.right = nw / 2 / zoom;
-      camera.top = nh / 2 / zoom;
-      camera.bottom = -nh / 2 / zoom;
-      camera.updateProjectionMatrix();
-    });
-    ro.observe(container);
+    };
+    window.addEventListener("resize", onResize);
 
     // ── Mouse: zoom ───────────────────────────────────────────────────────
     const onWheel = (e: WheelEvent) => {
@@ -183,9 +164,9 @@ export function useThreeScene(
     // ── Cleanup ───────────────────────────────────────────────────────────
     return () => {
       cancelAnimationFrame(rafRef.current);
-      ro.disconnect();
       container.removeEventListener("wheel", onWheel);
       container.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("resize", onResize);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       renderer.dispose();
