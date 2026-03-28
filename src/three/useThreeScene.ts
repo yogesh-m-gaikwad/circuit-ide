@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { store } from "../store/store";
-import { setViewport } from "../store/documentsSlice";
+import { addComponent, setViewport } from "../store/documentsSlice";
+import { ComponentLayer, snapToGrid } from "./ComponentLayer";
+import { GhostComponent } from "./GhostComponent";
+import { TOOL_TYPE } from "../types/circuit";
+import { createComponentFromType } from "./componentFactory";
 
 const GRID_SIZE = 10000; // large enough to never see the edge
 const GRID_SPACING = 20; // pixels between grid lines at zoom 1
@@ -24,6 +28,8 @@ export function useThreeScene(
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a0a0a);
     sceneRef.current = scene;
+    const componentLayer = new ComponentLayer(scene);
+    const ghost = new GhostComponent(scene);
 
     // ── Camera ───────────────────────────────────────────────────────────
     const w = window.innerWidth;
@@ -51,6 +57,9 @@ export function useThreeScene(
     const grid = buildGrid();
     scene.add(grid);
     gridRef.current = grid;
+    // update ghost type when tool changes
+    // (checked every frame in animate)
+    let lastTool = "";
 
     // ── Render loop ──────────────────────────────────────────────────────
     const animate = () => {
@@ -82,9 +91,40 @@ export function useThreeScene(
       // scale grid lines to stay visually consistent at all zoom levels
       updateGrid(grid, zoom, camera.position.x, camera.position.y);
 
+      if (activeId) {
+        const doc = state.docs.documents[activeId];
+        componentLayer.sync(doc.circuit.components, doc.circuit.selectedIds);
+      }
+
+      // inside animate loop:
+      const { activeTool, componentTypeToPlace } = store.getState().editor;
+      const typeKey = `${activeTool}-${componentTypeToPlace}`;
+      if (typeKey !== lastTool) {
+        lastTool = typeKey;
+        if (activeTool === TOOL_TYPE.PLACE && componentTypeToPlace) {
+          ghost.setType(componentTypeToPlace.replace("PLACE-", ""));
+        } else {
+          ghost.setType(null);
+        }
+      }
+
       renderer.render(scene, camera);
     };
     animate();
+
+    const screenToWorld = (
+      e: MouseEvent,
+      container: HTMLElement,
+      camera: THREE.OrthographicCamera,
+    ): { x: number; y: number } => {
+      const rect = container.getBoundingClientRect();
+      const ndcX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const ndcY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      const vec = new THREE.Vector3(ndcX, ndcY, 0);
+      vec.unproject(camera);
+      return { x: vec.x, y: vec.y };
+    };
 
     const onResize = () => {
       const nw = window.innerWidth;
@@ -126,6 +166,10 @@ export function useThreeScene(
     };
 
     const onMouseMove = (e: MouseEvent) => {
+      const worldPos = screenToWorld(e, container, camera);
+      const shiftHeld = e.shiftKey;
+      ghost.moveTo(worldPos.x, worldPos.y, shiftHeld);
+
       if (!isPanning) return;
       const state = store.getState();
       const id = state.docs.activeDocumentId;
@@ -157,6 +201,45 @@ export function useThreeScene(
       if (e.button === 1) isPanning = false;
     };
 
+    // mouse click — place component
+    const onClick = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      const state = store.getState();
+      const id = state.docs.activeDocumentId;
+      console.log("click — activeDocumentId:", id);
+      console.log("click — activeTool:", state.editor.activeTool);
+      console.log(
+        "click — componentToPlace:",
+        state.editor.componentTypeToPlace,
+      );
+
+      if (!id) return;
+      const { activeTool, componentTypeToPlace } = state.editor;
+      if (activeTool !== TOOL_TYPE.PLACE || !componentTypeToPlace) {
+        console.log("not in place mode — bailing");
+        return;
+      }
+
+      const worldPos = screenToWorld(e, container, camera);
+      const placeX = e.shiftKey ? worldPos.x : snapToGrid(worldPos.x);
+      const placeY = e.shiftKey ? worldPos.y : snapToGrid(worldPos.y);
+      console.log("worldPos:", worldPos);
+
+      const component = createComponentFromType(
+        componentTypeToPlace,
+        placeX,
+        placeY,
+      );
+      console.log("component created:", component);
+
+      store.dispatch(addComponent({ documentId: id, component }));
+      console.log(
+        "dispatched — components now:",
+        store.getState().docs.documents[id]?.circuit.components,
+      );
+    };
+    container.addEventListener("click", onClick);
+
     container.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
@@ -166,6 +249,7 @@ export function useThreeScene(
       cancelAnimationFrame(rafRef.current);
       container.removeEventListener("wheel", onWheel);
       container.removeEventListener("mousedown", onMouseDown);
+      container.removeEventListener("click", onClick);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
@@ -235,3 +319,4 @@ function updateGrid(
     }
   });
 }
+

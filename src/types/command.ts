@@ -1,4 +1,5 @@
 import type { RootState, AppDispatch } from "../store/store";
+import type { ComponentType } from "./circuit";
 
 export type ArgType =
   | "string"
@@ -42,6 +43,7 @@ export interface CommandDefinition {
   description: string;
   args: CommandArg[];
   execute: (args: ParsedArgs, context: CommandContext) => CommandResult;
+  componentType: ComponentType;
   symbol?: string; // short glyph for toolbar — 'R', 'C', '⏚' etc
   label?: string; // human readable name
   category?: "place" | "action" | "view"; // for grouping

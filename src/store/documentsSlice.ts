@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, current } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { DocumentsState, PCBDocument, Viewport } from "../types/document";
 import type {
@@ -33,11 +33,12 @@ const newDocument = (id: string, name: string): PCBDocument => ({
 });
 
 const snapshot = (document: PCBDocument) => {
-  document.history.past.push(structuredClone(document.circuit));
+  const circuitSnapshot: CircuitState = structuredClone(
+    current(document.circuit),
+  );
+  document.history.past.push(circuitSnapshot);
   document.history.future = [];
-  if (document.history.past.length > 50) {
-    document.history.past.shift();
-  }
+  if (document.history.past.length > 50) document.history.past.shift();
 };
 
 const defaultDocument = newDocument("default-doc", "Untitled-doc");
@@ -244,7 +245,9 @@ const documentsSlice = createSlice({
     undo: (state, action: PayloadAction<{ documentId: string }>) => {
       const document = state.documents[action.payload.documentId];
       if (!document || document.history.past.length === 0) return;
-      document.history.future.unshift(structuredClone(document.circuit));
+      document.history.future.unshift(
+        structuredClone(current(document.circuit)),
+      );
       const previousState = document.history.past.pop()!;
       document.circuit = previousState;
       document.isDirty = true;
@@ -254,7 +257,7 @@ const documentsSlice = createSlice({
     redo: (state, action: PayloadAction<{ documentId: string }>) => {
       const document = state.documents[action.payload.documentId];
       if (!document || document.history.future.length === 0) return;
-      document.history.past.push(structuredClone(document.circuit));
+      document.history.past.push(structuredClone(current(document.circuit)));
       const nextState = document.history.future.shift()!;
       document.circuit = nextState;
       document.isDirty = true;

@@ -29,8 +29,6 @@ import { cn } from "../../lib/utils";
 import { getAllCommands } from "../../commands";
 import { useEffect, useRef, useState } from "react";
 
-const placeCommands = getAllCommands().filter((c) => c.category === "place");
-
 interface ToolButtonProps {
   icon: React.ReactNode;
   label: string;
@@ -90,6 +88,7 @@ export default function Toolbar() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
+  const placeCommands = getAllCommands().filter((c) => c.category === "place");
 
   const checkScroll = () => {
     const el = scrollRef.current;
@@ -189,7 +188,7 @@ export default function Toolbar() {
               }
               label={cmd.label ?? cmd.name}
               active={isPlacing(cmd.name)}
-              onClick={() => place(cmd.name)}
+              onClick={() => place(cmd.componentType)}
             />
           ))}
         </div>
